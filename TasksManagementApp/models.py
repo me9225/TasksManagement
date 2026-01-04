@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from sympy import false
 
 # Create your models here.
 ROLES=[
@@ -10,22 +12,17 @@ STATUS_CHOICES=[
     (2,"בתהליך"),
     (3,"הושלם"),
 ]
-class Employee(models.Model):
-    employee_id = models.AutoField(primary_key=True,null=False)
-    employee_name = models.CharField(max_length=100,null=False)
-    employee_email = models.EmailField(unique=True)
-    employee_phone = models.IntegerField(unique=True)
-    employee_address = models.TextField(null=False)
+class Employee(AbstractUser):
     employee_Team= models.ForeignKey('Team', on_delete=models.PROTECT,related_name='employees')
-    employee_role=models.IntegerField(choices=ROLES)
+    employee_role=models.CharField(choices=ROLES,max_length=10)
     def __str__(self):
-        return self.employee_name
+        return self.username
 
 class Team(models.Model):
     team_id = models.AutoField(primary_key=True,null=False)
-    team_Manager_Id = models.ForeignKey(Employee,on_delete=models.PROTECT)
+    team_Manager_Id = models.ForeignKey('Employee',on_delete=models.PROTECT, related_name='teams',null=False)
     def __str__(self):
-        return self.team_id
+        return str(self.team_id)
 
 class Task(models.Model):
     task_id = models.AutoField(primary_key=True,null=False)
