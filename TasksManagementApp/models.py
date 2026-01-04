@@ -3,18 +3,18 @@ from django.contrib.auth.models import AbstractUser
 from sympy import false
 
 # Create your models here.
-ROLES=[
-    (1,"מנהל"),
-    (2,"עובד"),
-]
 STATUS_CHOICES=[
     (1,"חדש"),
     (2,"בתהליך"),
     (3,"הושלם"),
 ]
 class Employee(AbstractUser):
-    employee_Team= models.ForeignKey('Team', on_delete=models.PROTECT,related_name='employees')
-    employee_role=models.CharField(choices=ROLES,max_length=10)
+    ROLES=[
+        (1,"מנהל"),
+        (2,"עובד"),
+    ]
+    employee_Team= models.ForeignKey('Team', on_delete=models.PROTECT,related_name='employees',null=True,blank=True)
+    employee_role=models.PositiveSmallIntegerField(choices=ROLES,null=False,default=2)
     def __str__(self):
         return self.username
 
