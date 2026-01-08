@@ -28,10 +28,10 @@ class Task(models.Model):
     task_id = models.AutoField(primary_key=True,null=False)
     task_name = models.CharField(max_length=100,null=False)
     task_description = models.TextField(null=False)
-    task_last_date = models.DateField(null=False)
-    task_completed_date = models.DateField(null=False)
+    task_last_date = models.DateField(null=True)
+    task_completed_date = models.DateField(null=True)
     task_status = models.IntegerField(choices=STATUS_CHOICES)
     task_team = models.ForeignKey(Team,on_delete=models.PROTECT,related_name='tasks')
-    task_employee = models.ForeignKey(Employee,on_delete=models.PROTECT,related_name='MyTasks')
+    task_employee = models.ForeignKey(Employee,on_delete=models.PROTECT,related_name='MyTasks',null=True)
     def __str__(self):
         return self.task_id

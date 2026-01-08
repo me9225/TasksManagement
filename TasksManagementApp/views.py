@@ -5,6 +5,7 @@ from django.contrib import messages
 from .models import Task, Employee
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 
 # Create your views here.
 def register(request):
@@ -53,7 +54,8 @@ def tasks(request):
     user = request.user
     role = user.employee_role
     employees = Employee.objects.all()
-    tasks_qs = Task.objects.all()
+    tasks_qs = get_tasks_for_current_user(request)
+
 
     # סינון
     status = request.GET.get('status')
@@ -61,7 +63,7 @@ def tasks(request):
     if status:
         tasks_qs = tasks_qs.filter(task_status=status)
     if employee:
-        tasks_qs = tasks_qs.filter(task_employee_id=employee)
+        tasks_qs = tasks_qs.filter(task_employee=employee)
 
     return render(request, 'tasks.html', {
         'user': user,
@@ -83,8 +85,7 @@ def add_task(request):
         task_name=name,
         task_description=desc,
         task_last_date=date,
-        task_completed_date=date,  # אפשר לשנות בהתאם ללוגיקה שלך
-        task_status=status,
+        task_status=1,
         task_team=request.user.employee_Team,
     )
     return redirect('tasks')
@@ -104,21 +105,38 @@ def take_task(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
     if not task.task_employee:
         task.task_employee = request.user
+        task.task_status = 2  # הגדרת סטטוס כבתהליך
         task.save()
     return redirect('tasks')
 
+@require_POST
 @login_required
 def edit_task(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
     if request.user.employee_role != 1:
         return redirect('tasks')
-    if request.method == 'POST':
+    # if request.method == 'POST':
         task.task_name = request.POST.get('task_name')
         task.task_description = request.POST.get('task_description')
         task.task_last_date = request.POST.get('task_last_date')
         task.task_status = request.POST.get('task_status')
         task.save()
         return redirect('tasks')
-    return render(request, 'edit_task.html', {'task': task})
+@require_POST
+@login_required
+def complete_task(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    if request.user == task.task_employee:
+        task.task_status = 3  # הגדרת סטטוס כהושלם
+        task.task_completed_date = timezone.now().date()
+        task.save()
+    return redirect('tasks')
+
+def get_tasks_for_current_user(request):
+    user = request.user
+    team = user.employee_Team
+    tasks = Task.objects.filter(task_team=team)
+    return tasks
+   
 
 

@@ -81,30 +81,54 @@
                 <div>
                     <h5 class="card-title mb-1">{{ task.task_name }}</h5>
                     <p class="card-text mb-1">{{ task.task_description }}</p>
+                    {% if task.task_status == 1 %}
+                        <div class="mb-1"><strong>סטטוס:</strong> חדש</div>
+                    {% elif task.task_status == 2 %}
+                        <div class="mb-1"><strong>סטטוס:</strong> בתהליך</div>
+                    {% elif task.task_status == 3 %}
+                        <div class="mb-1"><strong>סטטוס:</strong> הושלם</div>
+                    {% endif %} 
+                    {% if task.task_last_date %}
                     <div class="mb-1"><strong>תאריך יעד:</strong> {{ task.task_last_date }}</div>
+                    {% endif %}
+                    {% if task.task_completed_date %}
+                    <div class="mb-1"><strong>תאריך סיום:</strong> {{ task.task_completed_date }}</div>
+                    {% endif %}
                     <div>
-                        <strong>מבצע:</strong>
+                        <strong> עובד מבצע:</strong>
                         {% if task.task_employee %}
                             {{ task.task_employee.username }}
                         {% else %}
-                            <form method="post" action="{% url 'take_task' task.id %}" style="display:inline;">
+                            {% if task.task_id %}
+                            <form method="post" action="{% url 'take_task' task.task_id %}" style="display:inline;">
                                 {% csrf_token %}
                                 <button class="btn btn-outline-primary btn-sm">קח משימה</button>
                             </form>
+                            {% else %}
+                                לא מוקצה
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
                 <div class="task-actions d-flex align-items-center">
+                    {% if task.task_employee %}
+                            {% if task.task_employee == user and task.task_status == 2 %}
+                                <form method="post" action="{% url 'complete_task' task.task_id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button class="btn btn-outline-primary btn-sm">הושלם</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
                     {% if role == 1 %}
                         <!-- Edit -->
-                        {% if task.id %}
-                          <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-secondary btn-sm me-1" title="ערוך">
-                            <i class="bi bi-pencil"></i>
+                        {% if task.task_id %}
+                          <a data-bs-toggle="modal" data-bs-target="#editTaskModal" class="btn btn-outline-secondary btn-sm me-1" title="ערוך">
+                            <i class="bi bi-pencil" ></i>
                           </a>
                         {% endif %}
                         <!-- Delete -->
-                        {% if task.id %}
-                        <form method="post" action="{% url 'delete_task' task.id %}" style="display:inline;">
+                        {% if task.task_id %}
+                        <form method="post" action="{% url 'delete_task' task.task_id %}" style="display:inline;">
                             {% csrf_token %}
                             <button class="btn btn-outline-danger btn-sm" title="מחק">
                                 <i class="bi bi-trash"></i>
@@ -144,14 +168,14 @@
             <label class="form-label">תאריך יעד</label>
             <input type="date" name="task_last_date" class="form-control" required>
         </div>
-        <div class="mb-3">
+        <!-- <div class="mb-3">
             <label class="form-label">סטטוס</label>
             <select name="task_status" class="form-select" required>
                 <option value="1">חדש</option>
                 <option value="2">בתהליך</option>
                 <option value="3">הושלם</option>
             </select>
-        </div>
+        </div> -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</button>
@@ -161,6 +185,51 @@
   </div>
 </div>
 {% endif %}
+
+<!-- Edit Task Modal (for manager) -->
+<!-- {% if role == 1 %}
+
+<div class="modal fade edit-task-modal" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="editTaskModalLabel">עריכת משימה</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="סגור"></button>
+    </div>
+    <form action="{% url 'edit_task' task.task_id %}" method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">שם משימה</label>
+                <input type="text" name="task_name" class="form-control" value="{{ task.task_name }}" placeholder="{{ task.task_name }}">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">תיאור</label>
+                <textarea name="task_description" class="form-control" placeholder="{{ task.task_description }}">{{ task.task_description }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">תאריך יעד</label>
+                <input type="date" name="task_last_date" class="form-control" value="{{ task.task_last_date|date:'Y-m-d' }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">סטטוס</label>
+                <select name="task_status" class="form-select" required>
+                    <option value="1" {% if task.task_status == 1 %}selected{% endif %}>חדש</option>
+                    <option value="2" {% if task.task_status == 2 %}selected{% endif %}>בתהליך</option>
+                    <option value="3" {% if task.task_status == 3 %}selected{% endif %}>הושלם</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">שמור</button>
+            <a href="{% url 'tasks' %}" class="btn btn-secondary" data-bs-dismiss="modal">ביטול</a>
+        </div>
+    </form>
+    {% if task.id %}
+      <a href="{% url 'edit_task' task.task_id %}">ערוך</a>
+    {% endif %} 
+</div>
+</div>
+</div>
+{% endif %}-->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
