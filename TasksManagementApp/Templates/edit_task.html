@@ -35,6 +35,9 @@
         <button type="submit" class="btn btn-success">שמור</button>
         <a href="{% url 'tasks' %}" class="btn btn-secondary">ביטול</a>
     </form>
+    {% if task.id %}
+      <a href="{% url 'edit_task' task.id %}">ערוך</a>
+    {% endif %}
 </div>
-</body>
+</body> 
 </html>

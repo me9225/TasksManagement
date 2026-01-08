@@ -97,16 +97,20 @@
                 <div class="task-actions d-flex align-items-center">
                     {% if role == 1 %}
                         <!-- Edit -->
-                        <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-secondary btn-sm me-1" title="ערוך">
+                        {% if task.id %}
+                          <a href="{% url 'edit_task' task.id %}" class="btn btn-outline-secondary btn-sm me-1" title="ערוך">
                             <i class="bi bi-pencil"></i>
-                        </a>
+                          </a>
+                        {% endif %}
                         <!-- Delete -->
+                        {% if task.id %}
                         <form method="post" action="{% url 'delete_task' task.id %}" style="display:inline;">
                             {% csrf_token %}
                             <button class="btn btn-outline-danger btn-sm" title="מחק">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
