@@ -13,7 +13,7 @@ class Employee(AbstractUser):
         (1,"מנהל"),
         (2,"עובד"),
     ]
-    employee_Team= models.ForeignKey('Team', on_delete=models.PROTECT,related_name='employees',null=True,blank=True)
+    employee_Team= models.ForeignKey('Team', on_delete=models.PROTECT,related_name='employees',default=1,null=False,blank=True)
     employee_role=models.PositiveSmallIntegerField(choices=ROLES,null=False,default=2)
     def __str__(self):
         return self.username
@@ -31,7 +31,7 @@ class Task(models.Model):
     task_last_date = models.DateField(null=True)
     task_completed_date = models.DateField(null=True)
     task_status = models.IntegerField(choices=STATUS_CHOICES)
-    task_team = models.ForeignKey(Team,on_delete=models.PROTECT,related_name='tasks')
+    task_team = models.ForeignKey(Team,on_delete=models.PROTECT,related_name='tasks',default=1)
     task_employee = models.ForeignKey(Employee,on_delete=models.PROTECT,related_name='MyTasks',null=True)
     def __str__(self):
         return self.task_id

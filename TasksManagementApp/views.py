@@ -21,9 +21,8 @@ def register(request):
             return redirect('login')
     else:
         form = registerForm()
-    return render(request, 'register.html', {'form': form})
-
-def login(request):
+    
+    return render(request, 'register.html', {'form': form})  
     if(request.method == 'POST'):
         form = loginForm(request.POST)
         if(form.is_valid()):
@@ -77,16 +76,19 @@ def tasks(request):
 def add_task(request):
     if request.user.employee_role != 1:
         return redirect('tasks')
+    team = request.user.employee_Team if request.user.employee_Team is not None else 1
     name = request.POST.get('task_name')
     desc = request.POST.get('task_description')
     date = request.POST.get('task_last_date')
     status = request.POST.get('task_status')
+    # if date.date() < timezone.now().date():
+    #     date =timezone.now()
     Task.objects.create(
         task_name=name,
         task_description=desc,
         task_last_date=date,
         task_status=1,
-        task_team=request.user.employee_Team,
+        task_team=team,
     )
     return redirect('tasks')
 
@@ -109,19 +111,21 @@ def take_task(request, task_id):
         task.save()
     return redirect('tasks')
 
-@require_POST
 @login_required
-def edit_task(request, task_id):
-    task = get_object_or_404(Task, pk=task_id)
+def edit_task(request, task_id):  
     if request.user.employee_role != 1:
         return redirect('tasks')
-    # if request.method == 'POST':
+    task = get_object_or_404(Task, pk=task_id)
+    if request.method == 'POST':
         task.task_name = request.POST.get('task_name')
         task.task_description = request.POST.get('task_description')
         task.task_last_date = request.POST.get('task_last_date')
-        task.task_status = request.POST.get('task_status')
+        # if task.task_last_date < timezone.now():
+        #     task.task_last_date =timezone.now()
         task.save()
         return redirect('tasks')
+    return render(request, 'edit_task.html', {'task': task})
+
 @require_POST
 @login_required
 def complete_task(request, task_id):
